@@ -1,0 +1,368 @@
+---
+title: "hw03- Pipes and Programming Basics"
+author: "Huiqing Fu"
+date: "3/16/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, fig.path = "images/")
+```
+```{r}
+library("ggplot2")
+```
+
+```{bash}
+
+mkdir hw03
+cd hw03
+mkdir code
+mkdir data
+mkdir report
+mkdir images
+echo "#hw03" >> READMD.md
+```
+```{bash}
+cd data/
+curl -O https://raw.githubusercontent.com/ucb-stat133/stat133-spring-2018/master/data/nba2017-roster.csv
+```
+### 2) Pipelines and Redirection
+#####2.1) Write a pipeline to obtain the unique team names, and redirect the output to a text file team-names.txt. Use head to display the first five lines of the created file (output shown belown).
+```{bash}
+cut -f 2 -d "," nba2017-roster.csv  | tail +2 | sort -u > team-names.txt 
+head -n 5 team-names.txt
+```
+#####2.2)Write a pipeline to obtain the unique positions, and redirect the output to a text file position-names.txt. Use head to display the first five lines of the created file (output shown belown).
+```{bash}
+cut -f 3 -d "," nba2017-roster.csv | tail +2 | sort -u > position-names.txt
+head -n 5 position-names.txt
+```
+#####2.3) Write a pipeline to obtain the counts (i.e. frequencies) of the different experience values, displayed from largest to smallest (i.e. descending order). Redirect the output to a text file experience-counts.txt. Use head to display the first five lines of the created file (output 4 shown belown). The first column corresponds to count, the second column corresponds to experience.
+```{bash}
+cut -f 7 -d "," nba2017-roster.csv | tail +2  | sort -n| uniq -c > experience-counts.txt
+head -n 5 experience-counts.txt
+```
+#####2.4)Use output redirection commands to create a CSV file LAC.csv containing data for the LAC team (Los Angeles Clippers). Your CSV file should include column names. Use cat to display the content of the created file (output shown belown).
+```{bash}
+head -n 1 nba2017-roster.csv |cat
+grep "LAC" nba2017-roster.csv > LAC.csv
+cat LAC.csv
+```
+#####2.5) Write a pipeline to display the age frequencies of LAL players. The first column corresponds to count, the second column corresponds to age.
+```{bash}
+tail +2 nba2017-roster.csv |grep "LAL" | cut -f 6 -d ","  | sort| uniq -c > age-count.csv
+cat age-count.csv
+```
+#####2.6) Write a pipeline to find the number of players in CLE (Cleveland) team; the output should be just the number of players.
+```{bash}
+tail +2 nba2017-roster.csv | grep "CLE" | wc -l
+```
+#####2.7) Write pipelines to create a CSV file gsw-height-weight.csv that contains the player, height and weight of GSW players. Your CSV file should include column names. Use cat to display the file contents:
+```{bash}
+#head nba2017-roster.csv
+cut -f 1,4-5 -d "," nba2017-roster.csv | head -n 1 |cat
+#grep "GSW" nba2017-roster.csv | cut -f 1,4-5 -d "," | cat 
+grep "GSW" nba2017-roster.csv | cut -f 1,4-5 -d ","  |cat > gsw-height-weight.csv
+cat gsw-height-weight.csv
+```
+#####2.8)Write pipelines to create a file top10-salaries.csv containing the top10 player salaries, arranged by salary from largest to smallest. Your CSV file should include column names. Use cat to display the file contents
+```{bash ??????}
+#head -n 5 nba2017-roster.csv 
+#cut -f 1,8 -d "," nba2017-roster.csv | head -n 1 | cat
+cut -f 1,8 -d "," nba2017-roster.csv | tail +2 | sort -n -k 2 -r -t '\,'| head -n 10 | cat > top10-salaries.csv
+cat top10-salaries.csv
+
+```
+
+
+### 3) Binomial Probability Functions
+```{r}
+#Function is_integer()
+#'@ title is_integer
+#'@ description tests if a numeric value can be considered to be an integer number
+#'@ param x any numeric value
+#'@ return TRUE or FALSE
+
+is_integer <- function(x){ #1
+  if ( x%%2 ==1| x%%2 ==0){
+    return(TRUE)
+    } else{
+    return(FALSE)
+  }
+}#1
+```
+```{r}
+# TRUE's
+is_integer(-1)
+is_integer(0)
+is_integer(2L)
+is_integer(2)
+# FALSE's
+is_integer(2.1)
+is_integer(pi)
+is_integer(0.01)
+```
+```{r}
+#Function is_positive()
+#'@ title is_positive
+#'@ description tests if a numeric value is a positive number
+#'@ param x any numeric value
+#'@ return TRUE or FALSE
+is_positive <- function(x){ #1
+  if (x>0){
+    return(TRUE)
+    } else{
+    return(FALSE)
+  }
+}#1
+```
+```{r}
+# TRUE's
+is_positive(0.01)
+is_positive(2)
+# FALSE's
+is_positive(-2)
+is_positive(0)
+```
+
+```{r}
+#Function is_nonnegative()
+#'@ title is_nonnegative
+#'@ description tests if a numeric value is a non-negative number
+#'@ param x any numeric value
+#'@ return TRUE or FALSE
+is_nonnegative <- function(x){ #1
+  if (x>=0){
+    return(TRUE)
+    } else{
+    return(FALSE)
+  }
+}#1
+```
+```{r}
+# TRUE's
+is_nonnegative(0)
+is_nonnegative(2)
+# FALSE's
+is_nonnegative(-0.00001)
+is_nonnegative(-2)
+```
+```{r}
+#Function is_positive_integer()
+#'@ title is_positive_integer
+#'@ description tests if a numeric value is a positive_integer
+#'@ param x any numeric value
+#'@ return TRUE or FALSE     
+is_positive_integer <- function(x){ #1
+  if ((x%%2 ==0 | x%%2==1)& x>0){
+    return(TRUE)
+    } else{
+    return(FALSE)
+  }
+}#1
+```
+
+
+```{r}
+# TRUE
+is_positive_integer(2)
+is_positive_integer(2L)
+# FALSE
+is_positive_integer(0)
+is_positive_integer(-2)
+```
+
+```{r}
+#Function is_nonneg_integer()
+#'@ title is_nonneg_integer
+#'@ description tests if a numeric value can be considered to be a non-negative integer
+#'@ param x any numeric value
+#'@ return TRUE or FALSE     
+is_nonneg_integer <- function(x){ #1
+  if ((x%%2 ==0 | x%%2 ==1) && x>=0){
+    return(TRUE)
+    } else{
+    return(FALSE)
+  }
+}#1
+```
+```{r}
+# TRUE's
+is_nonneg_integer(0)
+is_nonneg_integer(1)
+# FALSE
+is_nonneg_integer(-1)
+is_nonneg_integer(-2.5)
+```
+```{r}
+#Function is_probability()
+#'@ title is_probability
+#'@ description tests if a given number p is a valid probability value: 0 <=p<=1
+#'@ param p any numeric value
+#'@ return TRUE or FALSE     
+is_probability <- function(p){ #1
+  if (p>=0 & p<=1){
+    return(TRUE)
+    } else{
+    return(FALSE)
+  }
+}#1
+```
+```{r}
+# TRUE's
+is_probability(0)
+is_probability(0.5)
+is_probability(1)
+# FALSE's
+is_probability(-1)
+is_probability(1.0000001)
+```
+
+```{r}
+#Function bin_factorial()
+#'@ title bin_factorial
+#'@ description Use a for loop to write a function bin_factorial() that calculates the factorial of a nonnegative integer n
+#'@ param x any numeric value
+#'@ return TRUE or FALSE     
+y=1
+bin_factorial <- function(x){
+  if (x>0){
+    for(i in 1:x){
+        y <- y*i
+    }
+    return(y)
+  }
+  else if(x==0){
+    return(1)
+  }
+  else{
+    stop("ahhh,The input should be a non-negative integer")
+  }
+}
+```
+```{r}
+# valid
+bin_factorial(5)
+## [1] 120
+bin_factorial(0)
+## [1] 1
+```
+```{r}
+# Use bin_factorial() to write a function bin_combinations() that calculates the number of combinations in which k successes can occur in n trials. 
+#' @Title bin_combinations
+#' @description: calculates the number of combinations in which k successes can occur in n trials
+#' @param n trials, a non-negative discrete value
+#' @param k successes, a non-negative discrete value
+#' @return 
+
+y=1
+
+bin_combinations <- function(n,k){
+  y = bin_factorial(n)/(bin_factorial((n-k))*bin_factorial(k))
+  return(y)
+}
+```
+```{r}
+bin_combinations(n = 5, k = 2)
+bin_combinations(10, 3)
+bin_combinations(4, 4)
+```
+
+```{r}
+# Function bin_probability() 
+# Use your functions is_nonneg_integer(), is_probability(), and bin_combinations()
+# to create a bin_probability() function. Your function should have arguments trials, success, and prob.
+#' @Title bin_probability
+#'
+#' @param trials, a non-negative discrete value
+#' @param success, a non-negative discrete value 
+#' @param prob 
+#'
+#' @return
+
+bin_probability <- function(trials, success, prob){
+  if(is_nonneg_integer(trials)==FALSE){
+    stop("Error! Number of trials are invalid.")
+  }else if(is_nonneg_integer(success)==FALSE){
+    stop("Error! Number of successes are invalid.")
+  }else if(is_probability(prob)==FALSE){
+    stop("Error! Probability should between 0 and 1.")
+  }else{
+    y = bin_combinations(trials,success)*(prob)^success*(1-prob)^(trials-success)
+  }
+  return(y)
+}
+```
+```{r}
+bin_probability(trials = 5, success = 2, prob = 0.5)
+```
+
+```{r}
+# Function bin_distribution()
+# Use bin_probability() to create a bin_distribution() function. Your function should have arguments trials, and prob. This function should return a data frame with the probability distribution. binomial probability distribution
+
+bin_distribution <- function(trials,prob){
+    success=0:trials
+    probability=rep(0, length=(trials+1))
+    i=1
+    while(i<=trials+1){
+       probability[i] <- bin_probability(trials,success[i],prob)
+       i=i+1
+       dat <- data.frame(success, probability)
+    }
+    dat
+}
+
+```
+
+
+```{r}
+#bin_distribution <- function(n,k)
+bin_distribution(trials = 5, prob = 0.5)
+```
+
+```{r}
+# Assume that the ¡§successful¡¨ event is getting a ¡§six¡¨ when rolling a die. Consider rolling a fair die 10 times. Use bin_probability() to find the probability of getting exactly 3 sixes.
+
+bin_probability(trials = 10, success = 3, prob = 1/6)
+```
+
+```{r}
+# Use bin_distribution() to obtain the distribution of the number of ¡§sixes¡¨ when
+# rolling a loaded die 10 times, in which the number ¡§six¡¨ has probability of 0.25. Make a plot of this distributiona plot of this distribution.
+
+bin_distribution(trials = 10, prob = 0.25)
+
+plot <- ggplot(bin_distribution(trials = 10, prob = 0.25), aes(x = success, y = probability)) + 
+  geom_bar(stat = "identity",  fill = "lightblue") + 
+  labs(title = "Distribution for a Loaded Die") +
+  scale_x_discrete(limits=c(0:10))
+print(plot)
+
+```
+
+
+```{r}
+# ¡E Use bin_probability(), and a for loop, to obtain the probability of getting more
+# than 3 heads in 5 tosses with a biased coin of 35% chance of heads.
+
+success=4:5
+for(i in 1:2){
+  
+  moreThan3[i] <- bin_probability(trials = 5, success[i], prob = 0.35)
+}
+sum(moreThan3)
+```
+```{r}
+# ¡E Use bin_distribution() to obtain the probability distribution of the number of heads when tossing a loaded coin 15 times, with 35% chance of heads. Make a plot of this distribution.
+bin_distribution(trials = 15, prob = 0.35)
+plot1 <- ggplot(bin_distribution(trials = 15, prob = 0.35), aes(x = success, y = probability)) + 
+  geom_bar(stat = "identity",  fill = "lightgreen") + 
+  labs(title = "Distribution for Number of Head") +
+  scale_x_discrete(limits=c(0:15))
+
+print(plot1)
+```
+
+
+
